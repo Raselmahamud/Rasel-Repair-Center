@@ -11,6 +11,8 @@ export enum ServiceType {
   SHOP_REPAIR = 'Shop Repair (Pickup/Dropoff)'
 }
 
+export type Priority = 'NORMAL' | 'URGENT';
+
 export interface Offer {
   id: string;
   technicianName: string;
@@ -22,12 +24,15 @@ export interface Offer {
 export interface RepairRequest {
   id: string;
   customerName: string;
+  contactPhone: string;
+  contactEmail: string;
   deviceType: string; // e.g., Phone, Laptop
   brand: string;
   model: string;
   issueDescription: string;
   location: string;
   serviceType: ServiceType;
+  priority: Priority;
   status: RequestStatus;
   createdAt: number;
   offers: Offer[];

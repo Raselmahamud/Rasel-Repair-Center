@@ -179,6 +179,13 @@ const App: React.FC = () => {
                     <h1 className="text-2xl font-bold text-slate-800">Repair Requests</h1>
                     <p className="text-slate-500">Manage all customer issues, view details, and update status.</p>
                   </div>
+                  <button 
+                    onClick={() => setCurrentView('CREATE_TICKET')}
+                    className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium shadow-sm transition-colors flex items-center gap-2"
+                  >
+                    <PlusCircle size={20} />
+                    Add Repair Request
+                  </button>
                 </div>
                 <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
                    <AdminView 

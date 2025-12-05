@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { RepairRequest, ServiceType, RequestStatus, Offer } from '../types';
+import { RepairRequest, ServiceType, RequestStatus, Offer, Priority } from '../types';
 import { analyzeRepairIssue } from '../services/geminiService';
-import { PlusCircle, MapPin, Wrench, DollarSign, Bot, Save, Smartphone, Laptop, Tablet, Watch } from 'lucide-react';
+import { PlusCircle, MapPin, Wrench, DollarSign, Bot, Save, Smartphone, Laptop, Tablet, Watch, Phone, Mail, Flame } from 'lucide-react';
 
 interface CustomerViewProps {
   requests: RepairRequest[];
@@ -18,7 +18,10 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ requests, onRequestA
   const [issue, setIssue] = useState('');
   const [location, setLocation] = useState('');
   const [customerName, setCustomerName] = useState('');
+  const [contactPhone, setContactPhone] = useState('');
+  const [contactEmail, setContactEmail] = useState('');
   const [serviceType, setServiceType] = useState<ServiceType>(ServiceType.HOME_SERVICE);
+  const [isUrgent, setIsUrgent] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [aiPreview, setAiPreview] = useState<string | null>(null);
 
@@ -35,12 +38,15 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ requests, onRequestA
     const newRequest: RepairRequest = {
       id: Date.now().toString(),
       customerName: customerName || "Walk-in Customer",
+      contactPhone: contactPhone || '-',
+      contactEmail: contactEmail || '-',
       deviceType,
       brand,
       model,
       issueDescription: issue,
       location: location || "Shop Counter",
       serviceType,
+      priority: isUrgent ? 'URGENT' : 'NORMAL',
       status: RequestStatus.OPEN,
       createdAt: Date.now(),
       offers: [],
@@ -54,6 +60,9 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ requests, onRequestA
     setIssue('');
     setLocation('');
     setCustomerName('');
+    setContactPhone('');
+    setContactEmail('');
+    setIsUrgent(false);
     setAiPreview(null);
   };
 
@@ -78,6 +87,7 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ requests, onRequestA
         {/* Section 1: Customer & Location */}
         <div className="space-y-4">
           <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">Customer Details</h3>
+          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-sm font-medium text-slate-700 mb-1">Customer Name</label>
@@ -90,8 +100,8 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ requests, onRequestA
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-slate-700 mb-1">Location / Address</label>
-              <div className="relative">
+               <label className="block text-sm font-medium text-slate-700 mb-1">Location / Address</label>
+               <div className="relative">
                 <MapPin className="absolute left-3 top-3 text-slate-400" size={18} />
                 <input
                   type="text"
@@ -102,6 +112,35 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ requests, onRequestA
                 />
               </div>
             </div>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+             <div>
+               <label className="block text-sm font-medium text-slate-700 mb-1">Phone Number</label>
+               <div className="relative">
+                  <Phone className="absolute left-3 top-3 text-slate-400" size={18} />
+                  <input
+                    type="tel"
+                    placeholder="+880..."
+                    value={contactPhone}
+                    onChange={(e) => setContactPhone(e.target.value)}
+                    className="w-full pl-10 p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  />
+               </div>
+             </div>
+             <div>
+               <label className="block text-sm font-medium text-slate-700 mb-1">Email <span className="text-slate-400 font-normal">(Optional)</span></label>
+               <div className="relative">
+                  <Mail className="absolute left-3 top-3 text-slate-400" size={18} />
+                  <input
+                    type="email"
+                    placeholder="john@example.com"
+                    value={contactEmail}
+                    onChange={(e) => setContactEmail(e.target.value)}
+                    className="w-full pl-10 p-3 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  />
+               </div>
+             </div>
           </div>
         </div>
 
@@ -181,27 +220,44 @@ export const CustomerView: React.FC<CustomerViewProps> = ({ requests, onRequestA
 
         {/* Section 4: Service Type */}
         <div className="space-y-4">
-           <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">Service Preference</h3>
-           <div className="flex gap-6">
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input 
-                  type="radio" 
-                  name="serviceType" 
-                  checked={serviceType === ServiceType.HOME_SERVICE}
-                  onChange={() => setServiceType(ServiceType.HOME_SERVICE)}
-                  className="w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300"
-                />
-                <span className="text-slate-700">Home Service</span>
-              </label>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input 
-                  type="radio" 
-                  name="serviceType" 
-                  checked={serviceType === ServiceType.SHOP_REPAIR}
-                  onChange={() => setServiceType(ServiceType.SHOP_REPAIR)}
-                  className="w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300"
-                />
-                <span className="text-slate-700">Shop Repair</span>
+           <h3 className="text-lg font-semibold text-slate-800 border-b border-slate-100 pb-2">Service Preference & Priority</h3>
+           
+           <div className="flex flex-col md:flex-row gap-6">
+              <div className="flex gap-6">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="serviceType" 
+                      checked={serviceType === ServiceType.HOME_SERVICE}
+                      onChange={() => setServiceType(ServiceType.HOME_SERVICE)}
+                      className="w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span className="text-slate-700">Home Service</span>
+                  </label>
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input 
+                      type="radio" 
+                      name="serviceType" 
+                      checked={serviceType === ServiceType.SHOP_REPAIR}
+                      onChange={() => setServiceType(ServiceType.SHOP_REPAIR)}
+                      className="w-5 h-5 text-blue-600 focus:ring-blue-500 border-gray-300"
+                    />
+                    <span className="text-slate-700">Shop Repair</span>
+                  </label>
+              </div>
+
+              <div className="h-6 w-px bg-slate-200 hidden md:block"></div>
+
+              <label className="flex items-center gap-3 cursor-pointer p-3 bg-red-50 rounded-lg border border-red-100 hover:bg-red-100 transition-colors w-fit">
+                 <input 
+                    type="checkbox"
+                    checked={isUrgent}
+                    onChange={(e) => setIsUrgent(e.target.checked)}
+                    className="w-5 h-5 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                 />
+                 <div className="flex items-center gap-2 text-red-700 font-semibold text-sm">
+                    <Flame size={16} /> Urgent Request
+                 </div>
               </label>
            </div>
         </div>

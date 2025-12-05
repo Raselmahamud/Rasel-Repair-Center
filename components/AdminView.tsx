@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { RepairRequest, RequestStatus } from '../types';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area } from 'recharts';
-import { Users, AlertCircle, CheckCircle, TrendingUp, MoreVertical, Smartphone, Laptop, Tablet, Watch, Eye, Edit, Trash2, X, Save, MapPin, Calendar, DollarSign, PenTool, ClipboardList, Loader2, CheckSquare, XCircle } from 'lucide-react';
+import { Users, AlertCircle, CheckCircle, TrendingUp, MoreVertical, Smartphone, Laptop, Tablet, Watch, Eye, Edit, Trash2, X, Save, MapPin, Calendar, DollarSign, PenTool, ClipboardList, Loader2, CheckSquare, XCircle, Phone, Mail, Home, Briefcase, Flame, Clock } from 'lucide-react';
 
 interface AdminViewProps {
   requests: RepairRequest[];
@@ -317,66 +317,112 @@ export const AdminView: React.FC<AdminViewProps> = ({ requests, hideCharts = fal
           <table className="w-full text-left border-collapse">
             <thead className="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider font-semibold">
               <tr>
-                <th className="px-6 py-4">Request ID</th>
                 <th className="px-6 py-4">Customer</th>
-                <th className="px-6 py-4">Device Info</th>
+                <th className="px-6 py-4">Address</th>
+                <th className="px-6 py-4">Device</th>
+                <th className="px-6 py-4">Details</th>
                 <th className="px-6 py-4">Status</th>
-                <th className="px-6 py-4">Date</th>
                 <th className="px-6 py-4 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100">
               {filteredRequests.map((req) => (
                 <tr key={req.id} className="hover:bg-slate-50 transition-colors group">
-                  <td className="px-6 py-4 text-sm font-medium text-slate-900">
-                    #{req.id.slice(-6)}
+                  {/* Customer Column */}
+                  <td className="px-6 py-4">
+                    <div className="flex items-start gap-3">
+                       <div className="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-600 font-bold text-xs">
+                          {req.customerName.charAt(0)}
+                       </div>
+                       <div>
+                         <div className="text-sm font-bold text-slate-900">{req.customerName}</div>
+                         <div className="flex flex-col gap-0.5 mt-0.5">
+                           {req.contactPhone && (
+                             <div className="flex items-center gap-1.5 text-xs text-slate-500">
+                               <Phone size={10} className="text-slate-400"/> {req.contactPhone}
+                             </div>
+                           )}
+                           {req.contactEmail && (
+                             <div className="flex items-center gap-1.5 text-xs text-slate-400">
+                               <Mail size={10} className="text-slate-300"/> {req.contactEmail}
+                             </div>
+                           )}
+                         </div>
+                       </div>
+                    </div>
                   </td>
-                  <td className="px-6 py-4 text-sm text-slate-600">
-                    <div className="font-medium text-slate-900">{req.customerName}</div>
-                    <div className="text-xs text-slate-400 flex items-center gap-1"><MapPin size={10}/> {req.location}</div>
+
+                  {/* Address Column */}
+                  <td className="px-6 py-4">
+                     <div className="flex items-start gap-1.5">
+                        <MapPin size={14} className="text-slate-400 mt-0.5 flex-shrink-0" />
+                        <span className="text-sm text-slate-600 leading-snug">{req.location}</span>
+                     </div>
                   </td>
+
+                  {/* Device Column */}
                   <td className="px-6 py-4 text-sm text-slate-600">
                     <div className="flex items-center gap-2">
                        <span className="p-1.5 bg-slate-100 rounded-md text-slate-500">
                          {getDeviceIcon(req.deviceType)}
                        </span>
                        <div>
-                         <div className="font-medium text-slate-800">{req.brand} {req.model}</div>
+                         <div className="font-semibold text-slate-800">{req.brand} {req.model}</div>
                          <div className="text-xs text-slate-400 truncate max-w-[150px]">{req.issueDescription}</div>
                        </div>
                     </div>
                   </td>
+
+                  {/* Details Column (Type & Priority) */}
+                  <td className="px-6 py-4">
+                     <div className="flex flex-col gap-2 items-start">
+                        {/* Service Type Badge */}
+                        <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${req.serviceType.includes('Home') ? 'bg-indigo-50 text-indigo-700 border-indigo-100' : 'bg-orange-50 text-orange-700 border-orange-100'}`}>
+                           {req.serviceType.includes('Home') ? <Home size={10}/> : <Briefcase size={10}/>}
+                           {req.serviceType === 'Home Service' ? 'Home' : 'Shop'}
+                        </div>
+
+                        {/* Priority Badge */}
+                        <div className={`flex items-center gap-1 px-2 py-0.5 rounded text-[10px] font-bold border ${req.priority === 'URGENT' ? 'bg-red-50 text-red-600 border-red-100 animate-pulse' : 'bg-slate-100 text-slate-500 border-slate-200'}`}>
+                           {req.priority === 'URGENT' ? <Flame size={10}/> : <Clock size={10}/>}
+                           {req.priority}
+                        </div>
+                     </div>
+                  </td>
+
+                  {/* Status Column */}
                   <td className="px-6 py-4">
                     <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${getStatusColor(req.status)}`}>
                       {req.status.replace('_', ' ')}
                     </span>
+                    <div className="text-[10px] text-slate-400 mt-1">
+                       {new Date(req.createdAt).toLocaleDateString()}
+                    </div>
                   </td>
-                   <td className="px-6 py-4 text-sm text-slate-500">
-                    {new Date(req.createdAt).toLocaleDateString()}
-                  </td>
+
+                  {/* Actions Column */}
                   <td className="px-6 py-4 text-right">
-                    <div className="flex items-center justify-end gap-2">
-                       {/* 3 ACTIONS IMPLEMENTED HERE */}
+                    <div className="flex items-center justify-end gap-1">
                        <button 
                          onClick={() => openModal(req, 'VIEW')}
-                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" 
+                         className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" 
                          title="View Details"
                         >
-                         <Eye size={18} />
+                         <Eye size={16} />
                        </button>
                        <button 
                          onClick={() => openModal(req, 'EDIT')}
-                         className="p-2 text-slate-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" 
+                         className="p-1.5 text-slate-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" 
                          title="Edit Request"
                         >
-                         <Edit size={18} />
+                         <Edit size={16} />
                        </button>
                        <button 
                          onClick={() => handleDelete(req.id)}
-                         className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
+                         className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
                          title="Delete Request"
                         >
-                         <Trash2 size={18} />
+                         <Trash2 size={16} />
                        </button>
                     </div>
                   </td>
@@ -424,9 +470,10 @@ export const AdminView: React.FC<AdminViewProps> = ({ requests, hideCharts = fal
                           <div className="flex flex-wrap gap-2">
                              <span className="px-2 py-1 bg-slate-100 rounded text-xs font-semibold text-slate-600">{selectedReq.deviceType}</span>
                              <span className={`px-2 py-1 rounded text-xs font-semibold border ${getStatusColor(selectedReq.status)}`}>{selectedReq.status}</span>
+                             <span className={`px-2 py-1 rounded text-xs font-semibold border ${selectedReq.priority === 'URGENT' ? 'bg-red-50 text-red-600 border-red-200' : 'bg-slate-50 text-slate-500'}`}>{selectedReq.priority}</span>
                           </div>
                           <div className="text-sm text-slate-600 flex items-center gap-1"><MapPin size={14}/> {selectedReq.location}</div>
-                          <div className="text-sm text-slate-600 flex items-center gap-1"><Calendar size={14}/> {new Date(selectedReq.createdAt).toLocaleString()}</div>
+                          <div className="text-sm text-slate-600 flex items-center gap-1"><Phone size={14}/> {selectedReq.contactPhone}</div>
                        </div>
                     </div>
 

@@ -1,13 +1,15 @@
 import React, { useState } from 'react';
 import { Customer } from '../types';
-import { Plus, Search, Phone, Mail, MapPin, X, User, UserPlus, Check } from 'lucide-react';
+import { Plus, Search, Phone, Mail, MapPin, X, User, UserPlus, Check, Eye, Edit, Trash2 } from 'lucide-react';
 
 interface CustomerListViewProps {
   customers: Customer[];
   onAddCustomer: (customer: Customer) => void;
+  onUpdateCustomer?: (customer: Customer) => void;
+  onDeleteCustomer?: (customerId: string) => void;
 }
 
-export const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, onAddCustomer }) => {
+export const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, onAddCustomer, onUpdateCustomer, onDeleteCustomer }) => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   
@@ -82,6 +84,7 @@ export const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, o
                   <th className="px-6 py-4">Address</th>
                   <th className="px-6 py-4">Repairs</th>
                   <th className="px-6 py-4">Joined</th>
+                  <th className="px-6 py-4 text-right">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-100">
@@ -122,11 +125,38 @@ export const CustomerListView: React.FC<CustomerListViewProps> = ({ customers, o
                       <td className="px-6 py-4 text-sm text-slate-500">
                          {new Date(customer.joinedAt).toLocaleDateString()}
                       </td>
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end gap-2">
+                           <button 
+                             className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" 
+                             title="View Details"
+                            >
+                             <Eye size={18} />
+                           </button>
+                           <button 
+                             className="p-2 text-slate-400 hover:text-yellow-600 hover:bg-yellow-50 rounded-lg transition-colors" 
+                             title="Edit Customer"
+                            >
+                             <Edit size={18} />
+                           </button>
+                           <button 
+                             onClick={() => {
+                               if (onDeleteCustomer && window.confirm('Are you sure you want to delete this customer?')) {
+                                   onDeleteCustomer(customer.id);
+                               }
+                             }}
+                             className="p-2 text-slate-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors" 
+                             title="Delete Customer"
+                            >
+                             <Trash2 size={18} />
+                           </button>
+                        </div>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={5} className="px-6 py-12 text-center text-slate-400">
+                    <td colSpan={6} className="px-6 py-12 text-center text-slate-400">
                       No customers found matching your search.
                     </td>
                   </tr>

@@ -1,0 +1,7 @@
+{
+  "name": "Rasel Repair Center",
+  "description": "A platform connecting device owners with local repair technicians. Users can post issues, receive bids, and get their devices fixed at home or in-shop.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
